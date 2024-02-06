@@ -32,14 +32,10 @@ class DataLoader:
         raw_data_file = os.path.join(self.raw_data_path, name_file_out)
         self.data.to_csv(raw_data_file)
 
-    def basic_preprocessing(self, feature='Adj Close'):
-        self.data = self.data[feature]
 
-    def load_data(self, interval='daily', feature='Adj Close'):
+    def load_data(self, interval='daily'):
         if self.data is None:
             self.download_data(interval)
-
-        self.basic_preprocessing(feature)
 
         return self.data
 
