@@ -5,38 +5,41 @@ Data Loader Class
 
 import yfinance as yf
 import pandas as pd
-import logging
+import os
+
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 
 
 class DataLoader:
-    def __init__(self, ticker, start_date, end_date):
-        self.ticker = ticker
+    def __init__(self, tickers, start_date, end_date, raw_data_path='data/raw/'):
+        self.tickers = tickers
         self.start_date = start_date
         self.end_date = end_date
-        self.logger = logging.getLogger(__name__)
+        self.raw_data_path = raw_data_path
+        self.data = None
 
-    def load_data(self, frequency="daily"):
-        self.logger.info(f"Downloading {self.ticker} data from {self.start_date} to {self.end_date} with frequency {frequency}")
-        try:
-            data = yf.download(self.ticker, start=self.start_date, end=self.end_date, interval=frequency)
-            self.logger.info("Data downloaded successfully.")
-            return data
-        except Exception as e:
-            self.logger.error(f"Error downloading data: {str(e)}")
-            return None
+    def download_data(self, interval='daily', name_file_out="raw_data.csv"):
+        data_frames = []
+        for ticker in self.tickers:
+            stock_data = yf.download(ticker, start=self.start_date, end=self.end_date)
+            data_frames.append(stock_data)
 
-    def save_data(self, file_path):
-        data = self.load_data()
-        if data is not None:
-            data.to_csv(file_path)
-            self.logger.info(f'Data saved to {file_path}')
+        self.data = pd.concat(data_frames, keys=self.tickers, names=['Ticker', 'Date'])
 
-    def load_from_file(self, file_path):
-        try:
-            data = pd.read_csv(file_path, index_col='Date', parse_dates=True)
-            self.logger.info(f'Data loaded from {file_path}')
-            return data
-        except Exception as e:
-            self.logger.error(f"Error loading data from file: {str(e)}")
-            return None
+        raw_data_file = os.path.join(self.raw_data_path, name_file_out)
+        self.data.to_csv(raw_data_file)
+
+    def basic_preprocessing(self, feature='Adj Close'):
+        self.data = self.data[feature]
+
+    def load_data(self, interval='daily', feature='Adj Close'):
+        if self.data is None:
+            self.download_data(interval)
+
+        self.basic_preprocessing(feature)
+
+        return self.data
+
