@@ -3,7 +3,7 @@ data:
   tickers:
     - MSFT
     - AAPL
-    - 2222.SR
+    - NVDA
     - AMZN 
     - GOOGL
  
@@ -11,6 +11,7 @@ data:
   end_date: '2023-12-31'
   raw_data_path: 'data/raw/'
   interval: 'daily'
+  features: 'Adj Close'
 
 
 

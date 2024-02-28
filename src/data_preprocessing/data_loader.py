@@ -31,11 +31,17 @@ class DataLoader:
 
         raw_data_file = os.path.join(self.raw_data_path, name_file_out)
         self.data.to_csv(raw_data_file)
+        
+    
+    def select_features(self, features):     
+	    self.data = self.data[features]
 
-
-    def load_data(self, interval='daily'):
+    def load_data(self, interval='daily', features = 'Adj Close'):
         if self.data is None:
             self.download_data(interval)
-
+		
+		
+        self.select_features(features)
+			
         return self.data
 
